@@ -1,24 +1,36 @@
-FROM wiremock/wiremock:3.10.0-1
+# BUILD
 
-LABEL maintainer="Christopher Holomek <holomekc.github@gmail.com>"
-LABEL org.label-schema.name="wiremock-gui"
-LABEL org.label-schema.build-date=${BUILD_DATE}
-LABEL org.label-schema.version=${WIREMOCK_VERSION:-1.0}
-LABEL org.label-schema.description="Extends WireMock with a graphical user interface"
-LABEL org.label-schema.url="https://github.com/holomekc/wiremock"
-LABEL org.label-schema.vcs-url="https://github.com/holomekc/wiremock"
-# LABEL org.label-schema.vcs-ref=${GIT_SHA:0:7}
-LABEL org.label-schema.vendor="Christopher Holomek"
-LABEL org.label-schema.schema-version="1.0"
-LABEL org.label-schema.docker.cmd="docker run -it --rm -p 8080:8080 -v $PWD/stubs:/home/wiremock holomekc/wiremock-gui:latest"
-LABEL org.label-schema.docker.cmd.debug="docker run -it --rm -p 8080:8080 -v $PWD/stubs:/home/wiremock holomekc/wiremock-gui:latest --verbose"
-LABEL org.label-schema.docker.cmd.help="docker run -it --rm -p 8080:8080 -v $PWD/stubs:/home/wiremock holomekc/wiremock-gui:latest --help"
+FROM gradle:8-jdk17 AS builder
 
-# Update again in case we need to update before wiremock image is updated
-RUN apt-get update && apt-get upgrade -y
+WORKDIR /workdir
 
-ARG WIREMOCK_VERSION
+#RUN git clone https://github.com/wiremock/wiremock .
+ADD / /workdir
 
-# we remove the official standalone jar to reduce image size and download our own file
-RUN rm /var/wiremock/lib/*.jar && \
-    curl -fL "https://github.com/holomekc/wiremock/releases/download/$WIREMOCK_VERSION/wiremock-standalone-$WIREMOCK_VERSION.jar" -o /var/wiremock/lib/wiremock.jar
+RUN sed -i /Xmx3g/d gradle.properties
+
+RUN ./gradlew shadowJar
+
+# RUN
+
+FROM eclipse-temurin:17-jre
+
+LABEL maintainer="Rodolphe CHAIGNEAU <rodolphe.chaigneau@gmail.com>"
+
+WORKDIR /home/wiremock
+
+COPY --from=builder /workdir/build/libs/*.jar /var/wiremock/lib/wiremock-standalone.jar
+
+COPY docker-entrypoint.sh /
+RUN ["chmod", "+x", "/docker-entrypoint.sh"]
+
+# Init WireMock files structure
+RUN mkdir -p /home/wiremock/mappings && \
+	mkdir -p /home/wiremock/__files && \
+	mkdir -p /var/wiremock/extensions
+
+EXPOSE 8080 8443
+
+HEALTHCHECK --start-period=5s --start-interval=100ms CMD curl -f http://localhost:8080/__admin/health || exit 1
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
