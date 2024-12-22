@@ -4,8 +4,7 @@ FROM gradle:8-jdk17 AS builder
 
 WORKDIR /workdir
 
-#RUN git clone https://github.com/wiremock/wiremock .
-ADD / /workdir
+RUN git clone https://github.com/arunx1/macko.git .
 
 RUN sed -i /Xmx3g/d gradle.properties
 
@@ -15,7 +14,7 @@ RUN ./gradlew shadowJar
 
 FROM eclipse-temurin:17-jre
 
-LABEL maintainer="Rodolphe CHAIGNEAU <rodolphe.chaigneau@gmail.com>"
+LABEL maintainer="Arun Kumar"
 
 WORKDIR /home/wiremock
 
