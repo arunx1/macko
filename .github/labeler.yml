@@ -1,4 +1,0 @@
-bug:
-  - head-branch: ['^fix']
-enhancement:
-  - head-branch: ['^feat']
