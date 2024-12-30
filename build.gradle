@@ -184,11 +184,11 @@ allprojects {
     repoPassword = this.hasProperty('sonatypePassword') ? sonatypePassword : 'default'
 
     pomInfo = {
-      name 'WireMock'
+      name 'Macko'
       url 'http://wiremock.org'
       scm {
-        connection 'https://github.com/wiremock/wiremock.git'
-        developerConnection 'https://github.com/wiremock/wiremock.git'
+        connection 'https://github.com/ackotech/auto-qa-macko.git'
+        developerConnection 'https://github.com/ackotech/auto-qa-macko.git'
         url 'https://github.com/wiremock/wiremock'
       }
       licenses {

@@ -1,4 +1,4 @@
-rootProject.name = 'wiremock'
+rootProject.name = 'macko'
 if (JavaVersion.current() >= JavaVersion.VERSION_17) {
   include 'wiremock-jetty12'
 }

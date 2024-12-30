@@ -1,0 +1,6 @@
+docker run -it --rm \
+-e WIREMOCK_OPTIONS='--https-port 8443 --disable-http --preserve-user-agent-proxy-header --container-threads 50 --local-response-templating' \
+-p 443:8443 \
+--name macko \
+-v $PWD:/home/wiremock \
+macko
